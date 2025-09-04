@@ -8,6 +8,7 @@
   <!-- Icons + GitHub-like markdown CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css">
+  
 
   <style>
     :root{
@@ -135,6 +136,21 @@
     #output h1 { font-size: 2em; }
     #output h2 { font-size: 1.5em; }
     #output h3 { font-size: 1.2em; }
+    #output {
+    font-family: sans-serif;
+    background: #f9f9f9;
+    color: #222;
+    padding: 15px;
+    border-radius: 5px;
+    white-space: pre-wrap; /* keep line breaks */
+    }
+    
+    /* Make Markdown headings bold and colored */
+    #output .heading {
+        color: #1a73e8;
+        font-weight: bold;
+        display: block;
+    }
   </style>
 </head>
 <body>
@@ -442,6 +458,15 @@
         });
       }catch(e){}
     }
+    function styleHeadings(md) {
+    return md.split('\n').map(line => {
+        if(/^#+ /.test(line)) return `<span class="heading">${line}</span>`;
+        return line;
+    }).join('\n');
+    }
+    
+    $('output').innerHTML = styleHeadings(md);
+
     // restore then start periodic save
     loadLocal();
     // render after loading saved data
@@ -451,5 +476,6 @@
   </script>
 </body>
 </html>
+
 
 
