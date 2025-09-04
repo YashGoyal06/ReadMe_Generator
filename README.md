@@ -39,7 +39,6 @@ git clone https://github.com/yourusername/readme-generator.git
 cd readme-generator
 # Follow instructions depending on your implementation (Node.js, Python, etc.)
 Usage
-
 Visit gitdocify.vercel.app
 
 Fill in the project information form.
@@ -49,6 +48,8 @@ Copy the generated README content.
 Paste it into your GitHub/GitLab repository.
 
 Example Generated README
+markdown
+COPY CODE
 # My Awesome Project
 
 ## Description
@@ -65,7 +66,6 @@ Instructions on how to use the project.
 ## License
 MIT License
 Contributing
-
 Contributions are welcome! Steps:
 
 Fork the repository.
@@ -79,12 +79,8 @@ Push to the branch: git push origin feature-name.
 Open a Pull Request.
 
 License
-
-This project is licensed under the MIT License. See the LICENSE
- file for details.
+This project is licensed under the MIT License. See the LICENSE file for details.
 
 Contact
-
 Created by Yash Goyal
-
 Reach out for feedback, suggestions, or collaboration.
