@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Advanced README Generator — Single File</title>
+
+  <!-- Icons + GitHub-like markdown CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css">
+
+  <style>
+    :root{
+    --bg1: linear-gradient(135deg,#060b1a 0%, #0f172a 100%);
+    --accentA:#7c3aed;
+    --accentB:#06b6d4;
+    --glass: rgba(255,255,255,0.05);
+    --muted: #9aa6b2;
+    }
+    *{box-sizing:border-box}
+    body{
+    margin:0; min-height:100vh; font-family:Inter, system-ui, Arial, sans-serif;
+    background:var(--bg1); color:#e9f2fb; display:flex; flex-direction:column;
+    }
+
+    /* Header */
+    header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 24px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+    background:rgba(255,255,255,0.04);
+    backdrop-filter:blur(18px);
+    box-shadow:0 4px 24px rgba(0,0,0,0.55);
+    }
+    header h1{
+    margin:0;
+    font-size:1.5rem;
+    font-weight:700;
+    letter-spacing:0.5px;
+    color:#ffffff;
+    position:relative;
+    text-shadow:0 2px 6px rgba(0,0,0,0.4);
+    }
+    header h1::after{
+    content:"";
+    display:block;
+    height:3px;
+    width:100%;
+    margin-top:4px;
+    border-radius:2px;
+    background:linear-gradient(90deg,var(--accentA),var(--accentB));
+    }
+
+    /* Buttons */
+    .btn{
+    background:var(--glass); color:#f0f7ff; border:none; padding:9px 14px;
+    border-radius:12px; cursor:pointer; display:inline-flex; gap:8px; align-items:center;
+    font-size:0.9rem; font-weight:500;
+    transition:all .25s ease;
+    }
+    .btn:hover{ transform:translateY(-2px) scale(1.02); background: rgba(255,255,255,0.09); }
+    .btn.primary{ background: linear-gradient(90deg,var(--accentA),var(--accentB)); box-shadow:0 6px 20px rgba(124,58,237,0.35); color:#fff; font-weight:600 }
+    .btn.primary:hover {opacity:.95; box-shadow:0 8px 28px rgba(6,182,212,0.45)}
+
+    /* Layout */
+    .main{ display:grid; grid-template-columns:420px 1fr; gap:16px; padding:16px; flex:1; overflow:hidden; }
+    .panel{
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px; padding:18px; overflow:auto;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.55);
+    backdrop-filter:blur(20px);
+    }
+    .panel h2{ margin:6px 0 14px 0; color:#d9eeff; font-size:1rem; font-weight:600 }
+
+    /* Form fields */
+    .field{ margin-bottom:14px; }
+    label{ display:block; font-size:0.85rem; color:var(--muted); margin-bottom:6px; font-weight:500; }
+    input, textarea, select{
+    width:100%; padding:11px 13px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.06); color:#f1f8ff; font-size:0.92rem;
+    transition:border .2s, box-shadow .2s;
+    }
+    input:focus, textarea:focus, select:focus{
+    outline:none; border-color:var(--accentB);
+    box-shadow:0 0 0 3px rgba(6,182,212,0.25);
+    }
+    textarea{ min-height:80px; resize:vertical; }
+
+    /* Collapsible sections */
+    details{ background:rgba(255,255,255,0.03); padding:10px 12px; border-radius:12px; margin-bottom:10px; }
+    summary{ cursor:pointer; font-weight:600; color:#eaf6ff; outline:none; font-size:0.9rem }
+
+    /* Preview area */
+    .preview-split{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; height:calc(100vh - 180px); }
+    .card{
+    background: rgba(0,0,0,0.35);
+    padding:14px; border-radius:12px; overflow:auto;
+    box-shadow: inset 0 0 12px rgba(255,255,255,0.04);
+    }
+    #rawMd{
+    width:100%; height:100%; min-height:220px; background:#0b1220;
+    color:#f2f7ff; border-radius:10px; padding:14px;
+    font-family:monospace; font-size:0.88rem; white-space:pre-wrap;
+    border:1px solid rgba(255,255,255,0.08);
+    }
+    #preview{
+    padding:20px; background:#fff; border-radius:12px;
+    color:#0b1220; min-height:220px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.12);
+    }
+    .small-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; justify-content:space-between; }
+
+    /* Footer */
+    .footer-cred{ font-size:0.82rem; color:var(--muted); margin-top:10px; text-align:center }
+
+    /* Responsive */
+    @media (max-width:1000px){
+    .main{ grid-template-columns: 1fr; }
+    .preview-split{ grid-template-columns: 1fr; height:420px; }
+    #rawMd{ min-height:200px }
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width:8px; height:8px }
+    ::-webkit-scrollbar-track { background:transparent }
+    ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.25); border-radius:6px }
+    ::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.4) }
+    * { scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.25) transparent; }
+
+  </style>
+</head>
+<body>
+    <header>
+    <h1>README Generator</h1>
+    <div class="top-actions">
+        <button class="btn" id="demoBtn" title="Load demo sample"><i class="fa-solid fa-flask"></i> Demo</button>
+        <button class="btn" id="copyBtn" title="Copy markdown"><i class="fa-regular fa-clipboard"></i> Copy</button>
+        <button class="btn" id="downloadBtn" title="Download README"><i class="fa-solid fa-download"></i> Download</button>
+        <button class="btn primary" id="generateBtn" title="Generate README"><i class="fa-solid fa-magic"></i> Generate</button>
+    </div>
+    </header>
+
+
+  <div class="main">
+    <!-- LEFT: Form -->
+    <div class="panel" aria-label="Form panel">
+      <h2>Project Basics</h2>
+
+      <div class="field"><label for="inp-title">Title</label><input id="inp-title" placeholder="Project title (required)"></div>
+      <div class="field"><label for="inp-tagline">Tagline</label><input id="inp-tagline" placeholder="A short one-line description"></div>
+      <div class="field"><label for="inp-logo">Logo / Hero image URL</label><input id="inp-logo" placeholder="Image URL or Google Drive share link"></div>
+
+      <details open>
+        <summary>Content (click to collapse)</summary>
+        <div class="field"><label for="inp-description">Description</label><textarea id="inp-description" placeholder="Write a few paragraphs about the project"></textarea></div>
+        <div class="field"><label for="inp-features">Features (one per line)</label><textarea id="inp-features" placeholder="Feature 1\nFeature 2"></textarea></div>
+        <div class="field"><label for="inp-badges">Badges (label|value|color per line)</label><textarea id="inp-badges" placeholder="Model|v1.0|orange"></textarea><div class="hint">Example: <code>Model|v1.0|orange</code></div></div>
+        <div class="field"><label for="inp-tech">Tech Stack (comma separated)</label><input id="inp-tech" placeholder="Python, TensorFlow, Flask, JS"></div>
+      </details>
+
+      <details>
+        <summary>Install & Usage</summary>
+        <div class="field"><label for="inp-install">Installation (code block)</label><textarea id="inp-install" placeholder="git clone ..."></textarea></div>
+        <div class="field"><label for="inp-usage">Usage & examples</label><textarea id="inp-usage" placeholder="How to run and use"></textarea></div>
+      </details>
+
+      <details>
+        <summary>Assets & Contributors</summary>
+        <div class="field"><label for="inp-screens">Screenshots (one URL per line)</label><textarea id="inp-screens" placeholder="https://... or https://drive.google.com/file/d/FILEID/view"></textarea></div>
+        <div class="field"><label for="inp-links">Links (text|url per line)</label><textarea id="inp-links" placeholder="Live Demo|https://..."></textarea></div>
+        <div class="field"><label for="inp-contrib">Contributors (name|github-username or name|url per line)</label><textarea id="inp-contrib" placeholder="Yash Goyal|YashGoyal06"></textarea></div>
+      </details>
+
+      <div class="field"><label for="inp-license">License</label>
+        <select id="inp-license"><option value="">-- none --</option><option>MIT</option><option>Apache-2.0</option><option>GPL-3.0</option></select>
+      </div>
+
+      <div class="hint">Changes auto-generate after you stop typing for a moment. Use Demo to preload a skin-diagnosis example.</div>
+    </div>
+
+    <!-- RIGHT: Preview split: raw markdown | rendered -->
+    <div class="panel" aria-label="Preview panel">
+      <div class="preview-split">
+        <div class="card">
+          <div class="small-row" style="justify-content:space-between;align-items:center">
+            <div class="muted">Raw Markdown</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn" id="applyEditBtn" title="Apply raw edits to preview">Apply</button>
+            </div>
+          </div>
+          <textarea id="rawMd" readonly spellcheck="false" aria-label="Raw markdown output"></textarea>
+        </div>
+
+        <div class="card">
+          <div class="small-row" style="justify-content:space-between;align-items:center">
+            <div class="muted">Preview</div>
+            <div class="muted">Rendered (GitHub-style)</div>
+          </div>
+          <div id="preview" class="markdown-body" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="footer-cred">Generated with ❤️ — Advanced README Generator</div>
+    </div>
+  </div>
+
+  <!-- marked for markdown rendering (light) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <script>
+  // All bindings inside DOMContentLoaded to avoid "not working" issues
+  window.addEventListener('DOMContentLoaded', () => {
+    const $ = id => document.getElementById(id);
+
+    // Elements
+    const inp = {
+      title: $('inp-title'),
+      tagline: $('inp-tagline'),
+      logo: $('inp-logo'),
+      description: $('inp-description'),
+      features: $('inp-features'),
+      badges: $('inp-badges'),
+      tech: $('inp-tech'),
+      install: $('inp-install'),
+      usage: $('inp-usage'),
+      screens: $('inp-screens'),
+      links: $('inp-links'),
+      contrib: $('inp-contrib'),
+      license: $('inp-license')
+    };
+    const rawMd = $('rawMd');
+    const preview = $('preview');
+
+    const btnGenerate = $('generateBtn');
+    const btnDemo = $('demoBtn');
+    const btnCopy = $('copyBtn');
+    const btnDownload = $('downloadBtn');
+    const btnApply = $('applyEditBtn');
+
+    // Debounce helper
+    function debounce(fn, ms=500){
+      let t;
+      return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); };
+    }
+
+    // Utility: parse lines (non-empty)
+    function parseLines(s){
+      if(!s) return [];
+      return s.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    }
+
+    // Convert common Google Drive share links to direct viewable link
+    function convertDriveUrl(url){
+      if(!url) return url;
+      url = url.trim();
+      try{
+        if(url.startsWith('data:')) return url;
+        const u = new URL(url);
+        if(u.hostname.includes('drive.google.com')){
+          // /file/d/FILEID/...
+          const m = u.pathname.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+          if(m) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+          // ?id=FILEID
+          if(u.searchParams.get('id')) return `https://drive.google.com/uc?export=view&id=${u.searchParams.get('id')}`;
+        }
+      } catch(e){
+        // not a valid URL string; leave as-is
+      }
+      return url;
+    }
+
+    // Build badges string (shields.io)
+    function buildBadges(lines){
+      return lines.map(line=>{
+        const parts = line.split('|').map(p=>p.trim());
+        if(parts.length < 2) return '';
+        const label = encodeURIComponent(parts[0]||'');
+        const message = encodeURIComponent(parts[1]||'');
+        const color = encodeURIComponent((parts[2]||'blue').replace('#',''));
+        return `![${parts[0]}](https://img.shields.io/badge/${label}-${message}-${color}?style=for-the-badge)`;
+      }).filter(Boolean).join(' ');
+    }
+
+    // Build markdown content
+    function buildMarkdown(){
+      const title = inp.title.value || 'Project Title';
+      const tagline = inp.tagline.value || '';
+      const logoRaw = inp.logo.value || '';
+      const logo = logoRaw ? convertDriveUrl(logoRaw) : '';
+      const description = inp.description.value || '';
+      const features = parseLines(inp.features.value);
+      const badgesStr = buildBadges(parseLines(inp.badges.value));
+      const techs = (inp.tech.value || '').split(',').map(s=>s.trim()).filter(Boolean);
+      const install = inp.install.value || '';
+      const usage = inp.usage.value || '';
+      const screens = parseLines(inp.screens.value).map(convertDriveUrl);
+      const links = parseLines(inp.links.value);
+      const contribs = parseLines(inp.contrib.value);
+      const license = inp.license.value || '';
+
+      // Build markdown carefully preserving newlines
+      let md = `# ${title}\n\n`;
+      if(tagline) md += `> ${tagline}\n\n`;
+      if(logo) md += `![Logo](${logo})\n\n`;
+      if(badgesStr) md += badgesStr + '\n\n';
+
+      if(description) md += `## 🌟 Overview\n${description}\n\n`;
+      if(features.length) md += `## ✨ Features\n${features.map(f=>'- '+f).join('\n')}\n\n`;
+      if(techs.length) md += `## 💻 Tech Stack\n${techs.map(t=>'- '+t).join('\n')}\n\n`;
+      if(install) md += '## 🚀 Installation\n' + '```bash\n' + install + '\n' + '```\n\n';
+      if(usage) md += `## 📖 Usage\n${usage}\n\n`;
+      if(screens.length) md += `## 📸 Screenshots\n${screens.map(s=>`![](${s})`).join('\n\n')}\n\n`;
+      if(links.length) md += `## 🔗 Links\n${links.map(l=>{ const p = l.split('|'); return p[1] ? `- [${p[0]}](${p[1]})` : `- ${p[0]}` }).join('\n')}\n\n`;
+      if(contribs.length) md += `## 🤝 Contributors\n${contribs.map(c=>{ const p=c.split('|'); if(p[1] && !/^https?:\/\//i.test(p[1])) return `- [${p[0]}](https://github.com/${p[1]})`; if(p[1]) return `- [${p[0]}](${p[1]})`; return `- ${p[0]}` }).join('\n')}\n\n`;
+      if(license) md += `## 📄 License\nThis project is licensed under the **${license}** license.\n\n`;
+      md += `---\n_Generated with ❤️ — Advanced README Generator_\n`;
+
+      return md;
+    }
+
+    // Render markdown to preview + set raw
+    function renderAll(){
+      const md = buildMarkdown();
+      rawMd.value = md;
+      try{
+        // Use marked to render
+        preview.innerHTML = marked.parse(md);
+      }catch(e){
+        preview.innerHTML = '<pre style="color:red">Markdown render error</pre>';
+      }
+      // store current md
+      window.__currentReadme = md;
+    }
+
+    // Debounced auto render on inputs
+    const debouncedRender = debounce(renderAll, 450);
+
+    // Wire inputs for auto rendering
+    const inputs = [
+      inp.title, inp.tagline, inp.logo, inp.description, inp.features, inp.badges,
+      inp.tech, inp.install, inp.usage, inp.screens, inp.links, inp.contrib, inp.license
+    ];
+    inputs.forEach(el => {
+      el.addEventListener('input', debouncedRender);
+    });
+
+    // Buttons
+    btnGenerate.addEventListener('click', renderAll);
+    btnDemo.addEventListener('click', ()=> {
+      // Skin Diagnosis demo
+      inp.title.value = 'SKIN ALGNOSIS';
+      inp.tagline.value = '🩺 AI-Powered Skin Lesion Detection & Diagnosis';
+      inp.logo.value = 'https://img.shields.io/badge/SKIN-ALGNOSIS-8B5CF6?style=for-the-badge&logo=medical&logoColor=white';
+      inp.description.value = `SKIN ALGNOSIS is a cutting-edge AI-powered web platform that democratizes access to preliminary skin condition analysis. Upload images of skin lesions and receive instant, AI-generated insights about potential diseases.\n\n⚠️ **Disclaimer:** This tool provides preliminary insights only and is not a medical diagnosis. Always consult a qualified healthcare professional.`;
+      inp.features.value = 'AI-Based Skin Diagnosis\nInstant AI Predictions\nDetailed Medical Reports\nSecure Data Storage (HIPAA-minded)\nExportable PDF Reports';
+      inp.badges.value = 'Model|AI v1.0|ff6b6b\nBackend|Flask|3778c2\nDeploy|Vercel|00d4aa';
+      inp.tech.value = 'Python, TensorFlow, Flask, NumPy, Pandas, HTML5, CSS3, JavaScript';
+      inp.install.value = 'git clone https://github.com/YashGoyal06/SKIN-LESIONS.git\ncd SKIN-LESIONS\npip install -r requirements.txt\nnpm install\nnpm run dev';
+      inp.usage.value = '1. Start backend: `python app.py`\n2. Start frontend: `npm run dev`\n3. Open http://localhost:3000\n4. Upload images and get AI-generated report.';
+      inp.screens.value = 'https://dummyimage.com/900x500/8b5cf6/ffffff&text=Landing+Page\nhttps://drive.google.com/file/d/1vzNYRexampleID/view?usp=sharing';
+      inp.links.value = 'Live Demo|https://skinalgnosis.vercel.app\nModel|https://drive.google.com/file/d/1vzNYR_Z4WYRKQQYGRvQ6PgTFs2k60k7Z/view';
+      inp.contrib.value = 'Yash Goyal|YashGoyal06\nOpen Source Community|https://github.com';
+      inp.license.value = 'MIT';
+      renderAll();
+    });
+
+    btnCopy.addEventListener('click', ()=>{
+      const md = window.__currentReadme || rawMd.value;
+      if(!md){ alert('Nothing to copy'); return; }
+      navigator.clipboard.writeText(md).then(()=>{ alert('Markdown copied to clipboard'); }).catch(()=>alert('Copy failed'));
+    });
+
+    btnDownload.addEventListener('click', ()=>{
+      const md = window.__currentReadme || rawMd.value;
+      if(!md){ alert('Nothing to download'); return; }
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'README.md';
+      a.click();
+    });
+
+    // Allow user to edit raw markdown and apply to preview
+    btnApply.addEventListener('click', ()=>{
+      const txt = rawMd.value || '';
+      // If user edited raw, update preview and keep fields unchanged
+      try{ preview.innerHTML = marked.parse(txt); window.__currentReadme = txt; }catch(e){ preview.innerHTML = '<pre style="color:red">Markdown render error</pre>'; }
+    });
+
+    // Initial render
+    renderAll();
+
+    // small accessibility: press Ctrl+Enter in any textarea to generate
+    document.querySelectorAll('textarea').forEach(t=>{
+      t.addEventListener('keydown', e=>{
+        if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){ renderAll(); }
+      });
+    });
+
+    // Optional: autosave to localStorage (so user doesn't lose work)
+    const STORAGE_KEY = 'adv_readme_gen_saved_v1';
+    function saveLocal(){
+      try{
+        const data = {
+          title: inp.title.value, tagline: inp.tagline.value, logo: inp.logo.value,
+          description: inp.description.value, features: inp.features.value, badges: inp.badges.value,
+          tech: inp.tech.value, install: inp.install.value, usage: inp.usage.value,
+          screens: inp.screens.value, links: inp.links.value, contrib: inp.contrib.value,
+          license: inp.license.value
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }catch(e){}
+    }
+    function loadLocal(){
+      try{
+        const j = localStorage.getItem(STORAGE_KEY);
+        if(!j) return;
+        const data = JSON.parse(j);
+        ['title','tagline','logo','description','features','badges','tech','install','usage','screens','links','contrib','license'].forEach(k=>{
+          const el = {
+            title: inp.title, tagline: inp.tagline, logo: inp.logo, description: inp.description, features: inp.features,
+            badges: inp.badges, tech: inp.tech, install: inp.install, usage: inp.usage, screens: inp.screens,
+            links: inp.links, contrib: inp.contrib, license: inp.license
+          }[k];
+          if(el && data[k] !== undefined) el.value = data[k];
+        });
+      }catch(e){}
+    }
+    // restore then start periodic save
+    loadLocal();
+    // render after loading saved data
+    renderAll();
+    setInterval(saveLocal, 4000);
+  });
+  </script>
+</body>
+</html>
