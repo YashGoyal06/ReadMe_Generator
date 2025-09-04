@@ -149,6 +149,10 @@
 
       <div class="field"><label for="inp-title">Title</label><input id="inp-title" placeholder="Project title (required)"></div>
       <div class="field"><label for="inp-tagline">Tagline</label><input id="inp-tagline" placeholder="A short one-line description"></div>
+      <div class="field">
+          <label for="inp-live">Live Demo URL</label>
+          <input id="inp-live" placeholder="https://your-live-demo.com">
+      </div>
       <div class="field"><label for="inp-logo">Logo / Hero image URL</label><input id="inp-logo" placeholder="Image URL or Google Drive share link"></div>
 
       <details open>
@@ -217,6 +221,7 @@
     const inp = {
       title: $('inp-title'),
       tagline: $('inp-tagline'),
+      live: $('inp-live'), // Live Demo URL
       logo: $('inp-logo'),
       description: $('inp-description'),
       features: $('inp-features'),
@@ -285,6 +290,7 @@
     // Build markdown content
     function buildMarkdown(){
       const title = inp.title.value || 'Project Title';
+      const liveDemo = inp.live.value || '';
       const tagline = inp.tagline.value || '';
       const logoRaw = inp.logo.value || '';
       const logo = logoRaw ? convertDriveUrl(logoRaw) : '';
@@ -302,6 +308,7 @@
       // Build markdown carefully preserving newlines
       let md = `# ${title}\n\n`;
       if(tagline) md += `> ${tagline}\n\n`;
+      if(liveDemo) md += `[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](${liveDemo})\n\n`;
       if(logo) md += `![Logo](${logo})\n\n`;
       if(badgesStr) md += badgesStr + '\n\n';
 
@@ -351,6 +358,7 @@
       // Skin Diagnosis demo
       inp.title.value = 'SKIN ALGNOSIS';
       inp.tagline.value = '🩺 AI-Powered Skin Lesion Detection & Diagnosis';
+      if(!inp.live.value) inp.live.value = 'https://skinalgnosis.vercel.app';
       inp.logo.value = 'https://img.shields.io/badge/SKIN-ALGNOSIS-8B5CF6?style=for-the-badge&logo=medical&logoColor=white';
       inp.description.value = `SKIN ALGNOSIS is a cutting-edge AI-powered web platform that democratizes access to preliminary skin condition analysis. Upload images of skin lesions and receive instant, AI-generated insights about potential diseases.\n\n⚠️ **Disclaimer:** This tool provides preliminary insights only and is not a medical diagnosis. Always consult a qualified healthcare professional.`;
       inp.features.value = 'AI-Based Skin Diagnosis\nInstant AI Predictions\nDetailed Medical Reports\nSecure Data Storage (HIPAA-minded)\nExportable PDF Reports';
@@ -436,3 +444,4 @@
   </script>
 </body>
 </html>
+
