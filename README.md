@@ -30,6 +30,10 @@ Try it online: [gitdocify.vercel.app](gitdocify-one.vercel.app)
 
 ---
 
+## Contributor:
+
+- @AzhaanGlitch
+
 ## Installation (Optional)
 
 To run locally:
