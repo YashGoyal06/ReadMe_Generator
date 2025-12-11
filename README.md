@@ -8,7 +8,7 @@ A simple and efficient **Readme Generator** that helps developers quickly create
 
 ## Live Demo
 
-Try it online: [gitdocify.vercel.app](https://gitdocify.vercel.app)
+Try it online: [gitdocify.vercel.app](gitdocify-one.vercel.app)
 
 ---
 
